@@ -1,0 +1,52 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: topo
+  labels:
+    name: topo-daemonset
+    app: topo
+spec:
+  template:
+    metadata:
+      labels:
+        name: topo
+        app: topo
+        role: security
+    spec:
+      securityContext:
+        fsGroup: 2000
+      hostNetwork: true
+      containers:
+        - name: topo
+          image: gcr.io/k8sec-215018/topo
+          securityContext:
+            privileged: true
+            allowPrivilegeEscalation: true
+            capabilities:
+              add: ["CAP_NET_ADMIN"]
+          env:
+            - name: IFACE 
+              value: "any"
+            - name: PCAP_FILTER 
+              value: "port 80"
+            - name: SOCAT_HOST 
+              value: "10.156.0.4"
+            - name: SOCAT_PORT 
+              value: "8080"
+          volumeMounts:
+            - mountPath: /var/run/docker.sock
+              name: docker-socket
+            - mountPath: /dev
+              name: dev-fs
+            - mountPath: /sys
+              name: sys-fs
+      volumes:
+        - name: docker-socket
+          hostPath:
+            path: /var/run/docker.sock
+        - name: dev-fs
+          hostPath:
+            path: /dev
+        - name: sys-fs
+          hostPath:
+            path: /sys
