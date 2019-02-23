@@ -1,6 +1,45 @@
-socat tcp4-listen:8080,keepalive,reuseaddr,fork SYSTEM:'tee -a output$(date +%s).pcap'
-socat tcp4-listen:8080,keepalive,reuseaddr,fork SYSTEM:'tcpdump output$(date +%s).pcap'
+# TOPO Forwarder 
+TOPO is a tcpdump forwarder for kubernetes designed to redirect traffic off all nodes to an IDS, Molloch server or something similar. 
 
-openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout cert.key -out cert.pem
+This is the very first test and it has not been tested on production environments.
 
-socat openssl-listen:8080,cert=/cert.pem,key=/cert.key,keepalive,reuseaddr,fork,verify=0 SYSTEM:'tcpdump -r -  -w tcpdump_$(date +%s).pcap'
+First design has been tested in GCP, but it should work in any kubernetes cluster.
+
+## Usage
+## Receiver node:
+  
+  openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout cert.key -out cert.pem
+  socat openssl-listen:8080,cert=/cert.pem,key=/cert.key,keepalive,reuseaddr,fork,verify=0 SYSTEM:'tcpdump -r -  -w tcpdump_$(date +%s).pcap'
+
+## Deploy DaemonSet
+We use Daemon set for __topo__ because we need every time a pod has been updated.
+First of all modify topo-ds.yaml with your SOCAT server IP's and SOCAT server PORT you are going to use. 
+Then, create the DS. 
+
+  kubectl create -f topo-ds.yaml
+
+
+## Concerns
+* Performance
+* Resilience
+ * Client should detect when TCP connection against socat server has been broken/closed and restart the DS. Now I think it is detected when socat tries to sent data, so some data can be lost in non too busy scenarios.
+* Security! used pod runs in privileged mode! It is needed to add readonly filesystem and other security measures.
+ * Least prvileges possible
+ * SecurityContext, seccomp
+ * Disable all non needed Capabilities
+ * tcpdump command with least privileges possible
+ * CA certificate for clients
+ * Receiver security: iptables
+ 
+
+## TODOs.
+
+[ ] Clean yaml. For sure there are no needed permissions 
+[ ] Test in AZURE
+[ ] Test in AWS
+[ ] Performance test and enhancements. 
+[ ] Minimize the overhead
+[ ] Solution for POD's localhost traffic sniffing
+[ ] Automate receiver host deployment
+
+ 
