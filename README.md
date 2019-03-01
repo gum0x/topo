@@ -16,7 +16,7 @@ We use Daemon set for __topo__ because we need every time a pod has been updated
 First of all modify topo-ds.yaml with your SOCAT server IP's and SOCAT server PORT you are going to use. 
 Then, create the DS. 
 
-  kubectl create -f topo-ds.yaml
+  kubectl apply -f topo-ds.yaml
 
 
 ## Concerns
@@ -34,6 +34,8 @@ Then, create the DS.
 
 ## TODOs.
 
+[ ] Enhance Docker image. Detect and shutdown pod if tls tunnel is brocken. 
+[ ] Create Network policy
 [ ] Clean yaml. For sure there are no needed permissions 
 [ ] Test in AZURE
 [ ] Test in AWS
