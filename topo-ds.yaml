@@ -22,14 +22,11 @@ spec:
         name: topo
         app: topo
     spec:
-
-      securityContext:
-        fsGroup: 2000
       # Needed to attach to Host network
       hostNetwork: true
       containers:
         - name: topo
-          image: gcr.io/k8sec-215018/topo
+          image: eu.gcr.io/cluster-1-235110/topo:v0.2
           securityContext:
             privileged: true
             readOnlyRootFilesystem: true
@@ -39,15 +36,8 @@ spec:
             - name: IFACE 
               value: "any"
             - name: PCAP_FILTER 
-              value: "port 80"
+              value: "ip"
             - name: SOCAT_HOST 
-              value: "10.156.0.4"
+              value: "ids-01"
             - name: SOCAT_PORT 
-              value: "8080"
-          volumeMounts:
-            - mountPath: /sys
-              name: sys-fs
-      volumes:
-        - name: sys-fs
-          hostPath:
-            path: /sys
+              value: "58888"
