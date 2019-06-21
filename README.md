@@ -23,12 +23,15 @@ TODO:
 ## Install suricata node
 
 ```bash
+sudo yum -y install gcc libpcap-devel pcre-devel libyaml-devel file-devel \
+  zlib-devel jansson-devel nss-devel libcap-ng-devel libnet-devel tar make \
+  libnetfilter_queue-devel lua-devel socat tcpdump  wget
 wget https://www.openinfosecfoundation.org/download/suricata-4.1.3.tar.gz
 tar -xvzf suricata-4.1.3.tar.gz 
 cd suricata-4.1.3
 ./configure
 make &&  make install && make install-conf && make install-rules 
-yum -y install PyYAML
+
  wget https://rules.emergingthreats.net/open/suricata-4.1.3/emerging.rules.tar.gz
 tar -xvzf emerging.rules.tar.gz  -C /usr/local/etc/suricata/
 
