@@ -11,13 +11,21 @@ First design has been tested in GCP, but it should work in any kubernetes cluste
 ### Start Server Agent (file mode)
 ```bash  
   openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout cert.key -out cert.pem
-  socat openssl-listen:8080,cert=/cert.pem,key=/cert.key,keepalive,reuseaddr,fork,verify=0 SYSTEM:'tcpdump -r -  -w tcpdump_$(date +%s).pcap'
+  socat openssl-listen:58888,cert=cert.pem,key=cert.key,keepalive,reuseaddr,fork,verify=0 SYSTEM:'tcpdump -r - -G 30 -w tcpdump_$(date +%s).pcap'
 
 ```
 
 ### Start Server Agent (interface mode)
 ```
-TODO:
+# TODO: Not Working (on GKE at least)
+## Create interface
+curl  https://github.com/owlh/owlhostnettap/blob/master/dummy.sh.centos7|bash
+## Inject traffic
+socat -x -v -d -d openssl-listen:58888,cert=cert.pem,key=cert.key,keepalive,reuseaddr,fork,verify=0,ignoreeof SYSTEM:'tcpreplay -i owlh -t -l 1 -'
+## Set snaplenght to 9000 or less as eth0 interface on GKE has pket fragmentation offloading
+## Or disable offloading on given interface in the TOPO agent
+
+
 ```
 
 ## Install suricata node

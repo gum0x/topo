@@ -26,10 +26,11 @@ spec:
       hostNetwork: true
       containers:
         - name: topo
-          image: eu.gcr.io/cluster-1-235110/topo:v0.2
+          #image: eu.gcr.io/cluster-1-235110/topo:v0.3
+          image: gcr.io/k8sec-215018/topo:v0.3
           securityContext:
             privileged: true
-            readOnlyRootFilesystem: true
+            #readOnlyRootFilesystem: true
             capabilities:
               add: ["CAP_NET_ADMIN"]
           env:
@@ -38,6 +39,9 @@ spec:
             - name: PCAP_FILTER 
               value: "ip"
             - name: SOCAT_HOST 
-              value: "ids-01"
+              value: "nids-01"
             - name: SOCAT_PORT 
               value: "58888"
+            # Enable SNAPLENGHT if you are injecting the traffic to an interface
+            - name: SNAPLENGHT
+              value: "0"
