@@ -17,14 +17,17 @@ First design has been tested in GCP, but it should work in any kubernetes cluste
 
 ### Start Server Agent (interface mode)
 ```
-# TODO: Not Working (on GKE at least)
-## Create interface
-curl  https://github.com/owlh/owlhostnettap/blob/master/dummy.sh.centos7|bash
-## Inject traffic
-socat -x -v -d -d openssl-listen:58888,cert=cert.pem,key=cert.key,keepalive,reuseaddr,fork,verify=0,ignoreeof SYSTEM:'tcpreplay -i owlh -t -l 1 -'
 ## Set snaplenght to 9000 or less as eth0 interface on GKE has pket fragmentation offloading
 ## Or disable offloading on given interface in the TOPO agent
 
+# Configure monitoring interface
+# Create a dummy interface first
+ip link add mon0 type dummy
+ip link set mon0 up
+# Set the MTU size to the same as the topo agent set. Don't forget to change the same on topo-deploy.yaml
+ip link set dev mon0 mtu 9000
+## Inject traffic
+socat -x -v -d -d openssl-listen:58888,cert=cert.pem,key=cert.key,keepalive,reuseaddr,fork,verify=0,ignoreeof SYSTEM:'tcpreplay -i mon0 -t -l 1 -'
 
 ```
 
@@ -87,3 +90,14 @@ Then, create the DS.
 [ ] Automate receiver host deployment
 
  
+
+# Troubleshooting
+
+## "Unable to send packet: Error with PF_PACKET send() [50]: Message too long (errno = 90)" on the socat server
+This message usually happens because you are trying to inject a packet on the interface greater than the MTU set on that interfaces. 
+This could be because you are capturing larger packets on topo agents. Try check that mon0  MTU is  greater or equal than captured interfaces on kubernetes nodes. 
+If it is, check fragmentation offloading is not set on those interfaces. If it is, you have two options. 
+* Disable offloading options on the kernel. 
+* Set an equal or less MTU interface to avoid this problem. 
+
+
